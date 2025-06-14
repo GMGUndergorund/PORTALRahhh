@@ -7,7 +7,8 @@ FREEGAMES HUB - DEPLOYMENT INSTRUCTIONS
    - Ensure Python 3.11+ is installed
 
 2. INSTALL DEPENDENCIES
-   pip install -r deploy_requirements.txt
+   Option A (Recommended): uv install
+   Option B: pip install -r deploy_requirements.txt
 
 3. ENVIRONMENT VARIABLES (Required)
    SESSION_SECRET=your-random-secret-key-here
@@ -19,7 +20,7 @@ FREEGAMES HUB - DEPLOYMENT INSTRUCTIONS
    python main.py
    
    Production:
-   gunicorn --bind 0.0.0.0:5000 main:app
+   gunicorn --bind 0.0.0.0:5000 --reuse-port main:app
 
 5. ACCESS CREDENTIALS
    
@@ -29,26 +30,37 @@ FREEGAMES HUB - DEPLOYMENT INSTRUCTIONS
 
 6. FEATURES INCLUDED
    - Password-protected website access
-   - Modern gaming-themed UI with dark mode
-   - Enhanced game upload with screenshots
+   - Modern gaming-themed UI with dark mode and neon accents
+   - Enhanced game upload with multiple screenshots
    - Comprehensive game details (developer, publisher, system requirements)
-   - Multiple download links support
+   - Multiple download links support (3 total download sources)
    - Search engine protection (robots.txt)
-   - Advanced search and filtering
-   - Mobile-responsive design
+   - Advanced search and filtering with A-Z sorting
+   - Mobile-responsive design with smooth animations
+   - Game features checklist (multiplayer, VR, achievements, etc.)
+   - Platform support indicators (Windows, macOS, Linux, Android)
+   - Drag & drop file upload functionality
+   - Logo and screenshot management
 
 7. SECURITY NOTES
    - robots.txt blocks all search engines
    - Password required for any website access
-   - Secure admin panel
-   - File upload validation
-   - Session protection
+   - Secure admin panel with session management
+   - File upload validation and size limits
+   - Session protection with secure cookies
 
 8. CUSTOMIZATION
    - Change passwords in routes.py
    - Modify website name in templates
    - Update theme colors in static/css/modern-theme.css
    - Add more genres in upload form
+   - Customize feature lists and platform options
 
-Deployment Date: 2025-06-14 20:41:00
-Version: Enhanced Gaming Platform v2.0
+9. REPLIT DEPLOYMENT
+   - Project is pre-configured for Replit
+   - .replit file included with proper configuration
+   - Run button configured to start gunicorn server
+   - Auto-installs dependencies using uv
+
+Deployment Date: 2025-06-14 21:20:46
+Version: Enhanced Gaming Platform v2.1
