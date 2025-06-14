@@ -1,0 +1,526 @@
+{% extends "base.html" %}
+
+{% block title %}{{ game.title }} - FreeGames Hub{% endblock %}
+
+{% block extra_head %}
+<style>
+.game-hero {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.game-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--primary-gradient);
+}
+
+.game-logo-large {
+    max-width: 300px;
+    max-height: 400px;
+    border-radius: 16px;
+    object-fit: cover;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s ease;
+}
+
+.game-logo-large:hover {
+    transform: scale(1.05);
+}
+
+.download-btn {
+    background: var(--success-gradient);
+    border: none;
+    border-radius: 12px;
+    padding: 15px 30px;
+    font-weight: 600;
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+}
+
+.download-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(79, 172, 254, 0.6);
+    color: white;
+}
+
+.download-btn.secondary {
+    background: var(--card-bg);
+    border: 2px solid var(--neon-blue);
+    color: var(--neon-blue);
+    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
+}
+
+.download-btn.secondary:hover {
+    background: var(--neon-blue);
+    color: var(--dark-bg);
+}
+
+.feature-badge {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%);
+    border: 1px solid var(--neon-purple);
+    color: var(--neon-purple);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: inline-block;
+    margin: 4px;
+}
+
+.platform-badge {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(79, 172, 254, 0.2) 100%);
+    border: 1px solid var(--neon-blue);
+    color: var(--neon-blue);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: inline-block;
+    margin: 4px;
+}
+
+.screenshot-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+}
+
+.screenshot-item {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 16/9;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.screenshot-item:hover {
+    transform: scale(1.05);
+}
+
+.screenshot-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.info-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    transition: all 0.3s ease;
+}
+
+.info-card:hover {
+    border-color: var(--neon-blue);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.info-card h4 {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+}
+
+.game-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0;
+}
+
+.tag-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.requirements-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .requirements-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .game-hero {
+        padding: 20px;
+    }
+    
+    .screenshot-gallery {
+        grid-template-columns: 1fr;
+    }
+}
+
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.game-meta {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.download-stats {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid var(--neon-blue);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    margin: 16px 0;
+}
+
+.download-count {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--neon-blue);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Back Button -->
+    <div class="mb-4">
+        <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Games
+        </a>
+    </div>
+
+    <!-- Game Hero Section -->
+    <div class="game-hero">
+        <div class="row align-items-center">
+            <div class="col-lg-4">
+                {% if game.logo %}
+                    <img src="{{ url_for('uploaded_file', filename=game.logo) }}" 
+                         alt="{{ game.title }}" 
+                         class="game-logo-large w-100">
+                {% else %}
+                    <div class="d-flex align-items-center justify-content-center bg-secondary rounded" 
+                         style="height: 400px;">
+                        <i class="fas fa-gamepad fa-5x text-muted"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-lg-8">
+                <div class="ps-lg-4">
+                    <h1 class="display-5 mb-3">{{ game.title }}</h1>
+                    
+                    <div class="game-meta mb-3">
+                        {% if game.developer %}
+                            <span><i class="fas fa-code me-1"></i>{{ game.developer }}</span>
+                        {% endif %}
+                        {% if game.publisher %}
+                            <span class="ms-3"><i class="fas fa-building me-1"></i>{{ game.publisher }}</span>
+                        {% endif %}
+                        {% if game.release_date %}
+                            <span class="ms-3"><i class="fas fa-calendar me-1"></i>{{ game.release_date }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if game.genre %}
+                        <div class="mb-3">
+                            <span class="badge" style="background: var(--secondary-gradient); padding: 8px 16px; font-size: 1rem;">
+                                {{ game.genre }}
+                            </span>
+                            {% if game.category %}
+                                <span class="badge bg-secondary ms-2" style="padding: 8px 16px; font-size: 1rem;">
+                                    {{ game.category }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <p class="lead mb-4">{{ game.description }}</p>
+
+                    <!-- Game Stats -->
+                    <div class="row mb-4">
+                        {% if game.file_size %}
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="stat-number" style="font-size: 1.5rem;">{{ game.file_size }}</div>
+                                <small class="text-muted">File Size</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if game.version %}
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="stat-number" style="font-size: 1.5rem;">{{ game.version }}</div>
+                                <small class="text-muted">Version</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if game.language %}
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="stat-number" style="font-size: 1.2rem;">{{ game.language.split(',')[0] }}</div>
+                                <small class="text-muted">Languages</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="stat-number" style="font-size: 1.5rem;">{{ game.downloads or 0 }}</div>
+                                <small class="text-muted">Downloads</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Primary Download Button -->
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="{{ game.download_link }}" 
+                           class="download-btn"
+                           onclick="trackDownload('{{ game.id }}')"
+                           target="_blank">
+                            <i class="fas fa-download"></i>
+                            Download Now
+                        </a>
+                        {% if game.alt_download_link1 %}
+                        <a href="{{ game.alt_download_link1 }}" 
+                           class="download-btn secondary"
+                           onclick="trackDownload('{{ game.id }}')"
+                           target="_blank">
+                            <i class="fas fa-link"></i>
+                            Mirror 1
+                        </a>
+                        {% endif %}
+                        {% if game.alt_download_link2 %}
+                        <a href="{{ game.alt_download_link2 }}" 
+                           class="download-btn secondary"
+                           onclick="trackDownload('{{ game.id }}')"
+                           target="_blank">
+                            <i class="fas fa-link"></i>
+                            Mirror 2
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Details -->
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Screenshots -->
+            {% if game.screenshots %}
+            <div class="info-card">
+                <h4><i class="fas fa-images me-2"></i>Screenshots</h4>
+                <div class="screenshot-gallery">
+                    {% for screenshot in game.screenshots %}
+                    <div class="screenshot-item" data-bs-toggle="modal" data-bs-target="#screenshotModal{{ loop.index }}">
+                        <img src="{{ url_for('uploaded_file', filename=screenshot) }}" 
+                             alt="Screenshot {{ loop.index }}" 
+                             class="w-100">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Game Features -->
+            {% if game.features %}
+            <div class="info-card">
+                <h4><i class="fas fa-star me-2"></i>Game Features</h4>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for feature in game.features %}
+                    <span class="feature-badge">
+                        {% if feature == 'singleplayer' %}👤 Single-player
+                        {% elif feature == 'multiplayer' %}👥 Multiplayer
+                        {% elif feature == 'online_coop' %}🌐 Online Co-op
+                        {% elif feature == 'local_coop' %}🏠 Local Co-op
+                        {% elif feature == 'achievements' %}🏆 Achievements
+                        {% elif feature == 'controller_support' %}🎮 Controller Support
+                        {% elif feature == 'cloud_saves' %}☁️ Cloud Saves
+                        {% elif feature == 'mod_support' %}🔧 Mod Support
+                        {% elif feature == 'vr_support' %}🥽 VR Support
+                        {% else %}{{ feature }}
+                        {% endif %}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Installation Notes -->
+            {% if game.install_notes %}
+            <div class="info-card">
+                <h4><i class="fas fa-wrench me-2"></i>Installation Instructions</h4>
+                <pre style="white-space: pre-wrap; color: var(--text-primary);">{{ game.install_notes }}</pre>
+            </div>
+            {% endif %}
+
+            <!-- System Requirements -->
+            {% if game.min_requirements or game.rec_requirements %}
+            <div class="info-card">
+                <h4><i class="fas fa-desktop me-2"></i>System Requirements</h4>
+                <div class="requirements-grid">
+                    {% if game.min_requirements %}
+                    <div>
+                        <h6 class="text-warning mb-3">Minimum Requirements</h6>
+                        <pre style="white-space: pre-wrap; color: var(--text-secondary); font-size: 0.9rem;">{{ game.min_requirements }}</pre>
+                    </div>
+                    {% endif %}
+                    {% if game.rec_requirements %}
+                    <div>
+                        <h6 class="text-success mb-3">Recommended Requirements</h6>
+                        <pre style="white-space: pre-wrap; color: var(--text-secondary); font-size: 0.9rem;">{{ game.rec_requirements }}</pre>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Platforms -->
+            {% if game.platforms %}
+            <div class="info-card">
+                <h4><i class="fas fa-laptop me-2"></i>Supported Platforms</h4>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for platform in game.platforms %}
+                    <span class="platform-badge">
+                        {% if platform == 'windows' %}🖥️ Windows
+                        {% elif platform == 'mac' %}🍎 macOS
+                        {% elif platform == 'linux' %}🐧 Linux
+                        {% elif platform == 'android' %}📱 Android
+                        {% else %}{{ platform }}
+                        {% endif %}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Tags -->
+            {% if game.tags %}
+            <div class="info-card">
+                <h4><i class="fas fa-tags me-2"></i>Tags</h4>
+                <div class="game-tags">
+                    {% for tag in game.tags %}
+                    <span class="tag-badge">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Game Info -->
+            <div class="info-card">
+                <h4><i class="fas fa-info-circle me-2"></i>Game Information</h4>
+                <div class="mb-2">
+                    <strong>Genre:</strong> {{ game.genre or 'Not specified' }}
+                </div>
+                {% if game.developer %}
+                <div class="mb-2">
+                    <strong>Developer:</strong> {{ game.developer }}
+                </div>
+                {% endif %}
+                {% if game.publisher %}
+                <div class="mb-2">
+                    <strong>Publisher:</strong> {{ game.publisher }}
+                </div>
+                {% endif %}
+                {% if game.release_date %}
+                <div class="mb-2">
+                    <strong>Release Date:</strong> {{ game.release_date }}
+                </div>
+                {% endif %}
+                {% if game.upload_date %}
+                <div class="mb-2">
+                    <strong>Added:</strong> {{ game.upload_date }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Screenshot Modals -->
+{% if game.screenshots %}
+    {% for screenshot in game.screenshots %}
+    <div class="modal fade" id="screenshotModal{{ loop.index }}" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Screenshot {{ loop.index }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <img src="{{ url_for('uploaded_file', filename=screenshot) }}" 
+                         alt="Screenshot {{ loop.index }}" 
+                         class="w-100">
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function trackDownload(gameId) {
+    fetch(`/api/track-download/${gameId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    }).catch(error => {
+        console.log('Download tracking failed:', error);
+    });
+}
+
+// Add smooth animations
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.info-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

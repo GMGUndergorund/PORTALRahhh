@@ -106,47 +106,82 @@
         {% for game in games %}
         <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
             <div class="card h-100 game-card">
-                {% if game.logo %}
-                <img src="{{ url_for('uploaded_file', filename=game.logo) }}" 
-                     class="card-img-top game-logo" alt="{{ game.title }}">
-                {% else %}
-                <div class="card-img-top d-flex align-items-center justify-content-center bg-secondary" 
-                     style="height: 200px;">
-                    <i class="fas fa-gamepad fa-3x text-muted"></i>
-                </div>
-                {% endif %}
+                <a href="{{ url_for('game_detail', game_id=game.id) }}" class="text-decoration-none">
+                    {% if game.logo %}
+                    <img src="{{ url_for('uploaded_file', filename=game.logo) }}" 
+                         class="card-img-top game-logo" alt="{{ game.title }}">
+                    {% else %}
+                    <div class="card-img-top d-flex align-items-center justify-content-center bg-secondary" 
+                         style="height: 200px;">
+                        <i class="fas fa-gamepad fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                </a>
 
                 <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">{{ game.title }}</h5>
-                    <p class="card-text flex-grow-1">
+                    <a href="{{ url_for('game_detail', game_id=game.id) }}" class="text-decoration-none">
+                        <h5 class="card-title" style="color: var(--text-primary);">{{ game.title }}</h5>
+                    </a>
+                    <p class="card-text flex-grow-1" style="color: var(--text-secondary);">
                         {{ game.description[:100] }}{% if game.description|length > 100 %}...{% endif %}
                     </p>
                     
-                    {% if game.genre %}
-                    <p class="card-text">
-                        <small class="text-muted">
+                    <div class="mb-2">
+                        {% if game.genre %}
+                        <span class="badge" style="background: var(--secondary-gradient);">
                             <i class="fas fa-tag me-1"></i>{{ game.genre }}
+                        </span>
+                        {% endif %}
+                        {% if game.developer %}
+                        <small class="text-muted d-block mt-1">
+                            <i class="fas fa-code me-1"></i>{{ game.developer }}
                         </small>
-                    </p>
-                    {% endif %}
+                        {% endif %}
+                    </div>
 
                     {% if game.tags %}
                     <div class="mb-2">
                         {% for tag in game.tags[:3] %}
-                        <span class="badge bg-secondary me-1">{{ tag }}</span>
+                        <span class="badge bg-secondary me-1" style="font-size: 0.75rem;">{{ tag }}</span>
                         {% endfor %}
                         {% if game.tags|length > 3 %}
-                        <span class="badge bg-info">+{{ game.tags|length - 3 }} more</span>
+                        <span class="badge bg-info" style="font-size: 0.75rem;">+{{ game.tags|length - 3 }} more</span>
                         {% endif %}
                     </div>
                     {% endif %}
 
+                    <!-- Game Features Preview -->
+                    {% if game.features %}
+                    <div class="mb-2">
+                        {% for feature in game.features[:2] %}
+                        <small class="text-muted me-2">
+                            {% if feature == 'multiplayer' %}👥
+                            {% elif feature == 'singleplayer' %}👤
+                            {% elif feature == 'vr_support' %}🥽
+                            {% elif feature == 'controller_support' %}🎮
+                            {% else %}✓
+                            {% endif %}
+                            {{ feature.replace('_', ' ').title() }}
+                        </small>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
                     <div class="mt-auto">
-                        <a href="{{ game.download_link }}" class="btn btn-success w-100" target="_blank"
-                           onclick="trackDownload('{{ game.id }}')">
-                            <i class="fas fa-download me-1"></i>Download
-                        </a>
-                        <small class="text-muted d-block text-center mt-1">
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('game_detail', game_id=game.id) }}" 
+                               class="btn btn-outline-primary flex-grow-1">
+                                <i class="fas fa-eye me-1"></i>View Details
+                            </a>
+                            <a href="{{ game.download_link }}" 
+                               class="btn btn-success flex-grow-1" 
+                               target="_blank"
+                               onclick="trackDownload('{{ game.id }}')"
+                               title="Quick Download">
+                                <i class="fas fa-download me-1"></i>Download
+                            </a>
+                        </div>
+                        <small class="text-muted d-block text-center mt-2">
                             <i class="fas fa-download me-1"></i>{{ game.downloads or 0 }} downloads
                         </small>
                     </div>
