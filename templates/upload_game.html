@@ -1,0 +1,467 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Game - Game Hub{% endblock %}
+
+{% block extra_head %}
+<style>
+.screenshot-preview {
+    max-width: 100%;
+    max-height: 150px;
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+.tag-input {
+    position: relative;
+}
+
+.tag-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.tag-suggestion {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.tag-suggestion:hover {
+    background: var(--hover-bg);
+}
+
+.selected-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.tag-chip {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tag-chip .remove-tag {
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.tag-chip .remove-tag:hover {
+    opacity: 1;
+}
+
+.feature-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+}
+
+.rating-stars {
+    display: flex;
+    gap: 4px;
+}
+
+.rating-star {
+    font-size: 1.5rem;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.rating-star.active,
+.rating-star:hover {
+    color: #ffd700;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-rocket me-2"></i>Upload New Game</h2>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Form -->
+    <form method="POST" enctype="multipart/form-data" id="uploadForm">
+        <div class="row">
+            <!-- Media Section -->
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-images me-2"></i>Game Media</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Game Logo -->
+                        <div class="mb-4">
+                            <label class="form-label">Game Logo / Cover Art *</label>
+                            <div class="upload-zone d-flex align-items-center justify-content-center flex-column p-4" 
+                                 id="logoDropZone">
+                                <div id="logoDropContent">
+                                    <i class="fas fa-image fa-3x mb-3" style="color: var(--neon-blue);"></i>
+                                    <h5>Drop Logo Here</h5>
+                                    <p class="text-muted mb-2">or click to browse</p>
+                                    <small class="text-muted">JPG, PNG, GIF (Max: 16MB)</small>
+                                </div>
+                                <div id="logoPreview" style="display: none;">
+                                    <img id="logoImg" class="screenshot-preview" alt="Logo">
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="removeLogo()">
+                                            <i class="fas fa-times me-1"></i>Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="file" id="logoFile" name="logo" accept="image/*" style="display: none;">
+                        </div>
+
+                        <!-- Screenshots -->
+                        <div class="mb-3">
+                            <label class="form-label">Screenshots (Optional)</label>
+                            <div class="upload-zone p-3" id="screenshotDropZone">
+                                <div class="text-center">
+                                    <i class="fas fa-camera fa-2x mb-2" style="color: var(--neon-purple);"></i>
+                                    <p class="mb-2">Add up to 5 screenshots</p>
+                                    <small class="text-muted">Drag & drop or click to select</small>
+                                </div>
+                                <input type="file" id="screenshots" name="screenshots" accept="image/*" multiple style="display: none;">
+                            </div>
+                            <div id="screenshotPreviews" class="row mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Information -->
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Game Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Game Title *</label>
+                            <input type="text" class="form-control" id="title" name="title" required 
+                                   placeholder="Enter an awesome game title">
+                        </div>
+
+                        <!-- Developer & Publisher -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="developer" class="form-label">Developer</label>
+                                <input type="text" class="form-control" id="developer" name="developer" 
+                                       placeholder="Game developer">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="publisher" class="form-label">Publisher</label>
+                                <input type="text" class="form-control" id="publisher" name="publisher" 
+                                       placeholder="Game publisher">
+                            </div>
+                        </div>
+
+                        <!-- Genre & Category -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="genre" class="form-label">Primary Genre *</label>
+                                <select class="form-select" id="genre" name="genre" required>
+                                    <option value="">Select Genre</option>
+                                    <option value="Action">🎯 Action</option>
+                                    <option value="Adventure">🗺️ Adventure</option>
+                                    <option value="RPG">⚔️ RPG</option>
+                                    <option value="Strategy">🧠 Strategy</option>
+                                    <option value="Sports">⚽ Sports</option>
+                                    <option value="Racing">🏎️ Racing</option>
+                                    <option value="Puzzle">🧩 Puzzle</option>
+                                    <option value="Horror">👻 Horror</option>
+                                    <option value="Simulation">🏗️ Simulation</option>
+                                    <option value="Fighting">👊 Fighting</option>
+                                    <option value="Platform">🦘 Platform</option>
+                                    <option value="Shooter">🔫 Shooter</option>
+                                    <option value="MMORPG">🌍 MMORPG</option>
+                                    <option value="Casual">😊 Casual</option>
+                                    <option value="Indie">💎 Indie</option>
+                                    <option value="VR">🥽 VR</option>
+                                    <option value="Battle Royale">🎖️ Battle Royale</option>
+                                    <option value="Survival">🏕️ Survival</option>
+                                    <option value="Sandbox">🏗️ Sandbox</option>
+                                    <option value="Other">❓ Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="category" class="form-label">Category</label>
+                                <select class="form-select" id="category" name="category">
+                                    <option value="">Select Category</option>
+                                    <option value="AAA">AAA Game</option>
+                                    <option value="Indie">Indie Game</option>
+                                    <option value="Early Access">Early Access</option>
+                                    <option value="Beta">Beta Version</option>
+                                    <option value="Retro">Retro/Classic</option>
+                                    <option value="Mobile Port">Mobile Port</option>
+                                    <option value="Remaster">Remaster</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Release Date & Version -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="release_date" class="form-label">Release Date</label>
+                                <input type="date" class="form-control" id="release_date" name="release_date">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="version" class="form-label">Version</label>
+                                <input type="text" class="form-control" id="version" name="version" 
+                                       placeholder="v1.0.0">
+                            </div>
+                        </div>
+
+                        <!-- File Size & Language -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="file_size" class="form-label">File Size</label>
+                                <input type="text" class="form-control" id="file_size" name="file_size" 
+                                       placeholder="2.5 GB">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="language" class="form-label">Languages</label>
+                                <input type="text" class="form-control" id="language" name="language" 
+                                       placeholder="English, Spanish, French">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Details -->
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Game Description & Features</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Description -->
+                        <div class="mb-4">
+                            <label for="description" class="form-label">Game Description *</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" required 
+                                      placeholder="Write an engaging description that captures the essence of your game. Include gameplay features, story elements, and what makes it special..."></textarea>
+                        </div>
+
+                        <!-- Features -->
+                        <div class="mb-4">
+                            <label class="form-label">Game Features</label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="feature-toggle">
+                                        <input type="checkbox" class="form-check-input" id="singleplayer" name="features" value="singleplayer">
+                                        <label for="singleplayer">👤 Single-player</label>
+                                    </div>
+                                    <div class="feature-toggle">
+                                        <input type="checkbox" class="form-check-input" id="multiplayer" name="features" value="multiplayer">
+                                        <label for="multiplayer">👥 Multiplayer</label>
+                                    </div>
+                                    <div class="feature-toggle">
+                                        <input type="checkbox" class="form-check-input" id="online_coop" name="features" value="online_coop">
+                                        <label for="online_coop">🌐 Online Co-op</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="feature-toggle">
+                                        <input type="checkbox" class="form-check-input" id="local_coop" name="features" value="local_coop">
+                                        <label for="local_coop">🏠 Local Co-op</label>
+                                    </div>
+                                    <div class="feature-toggle">
+                                        <input type="checkbox" class="form-check-input" id="achievements" name="features" value="achievements">
+                                        <label for="achievements">🏆 Achievements</label>
+                                    </div>
+                                    <div class="feature-toggle">
+                                        <input type="checkbox" class="form-check-input" id="controller_support" name="features" value="controller_support">
+                                        <label for="controller_support">🎮 Controller Support</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="feature-toggle">
+                                        <input type="checkbox" class="form-check-input" id="cloud_saves" name="features" value="cloud_saves">
+                                        <label for="cloud_saves">☁️ Cloud Saves</label>
+                                    </div>
+                                    <div class="feature-toggle">
+                                        <input type="checkbox" class="form-check-input" id="mod_support" name="features" value="mod_support">
+                                        <label for="mod_support">🔧 Mod Support</label>
+                                    </div>
+                                    <div class="feature-toggle">
+                                        <input type="checkbox" class="form-check-input" id="vr_support" name="features" value="vr_support">
+                                        <label for="vr_support">🥽 VR Support</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="mb-4">
+                            <label class="form-label">Tags</label>
+                            <div class="tag-input">
+                                <input type="text" class="form-control" id="tagInput" name="tag_input" 
+                                       placeholder="Type tags and press Enter (e.g., open-world, fantasy, indie)">
+                                <div class="tag-suggestions" id="tagSuggestions"></div>
+                            </div>
+                            <input type="hidden" id="tags" name="tags">
+                            <div class="selected-tags" id="selectedTags"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Download & System Requirements -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-download me-2"></i>Download Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Primary Download Link -->
+                        <div class="mb-3">
+                            <label for="download_link" class="form-label">Primary Download Link *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-link"></i></span>
+                                <input type="url" class="form-control" id="download_link" name="download_link" required 
+                                       placeholder="https://pixeldrain.com/u/ZCXH41bN">
+                            </div>
+                        </div>
+
+                        <!-- Alternative Download Links -->
+                        <div class="mb-3">
+                            <label for="alt_download_link1" class="form-label">Alternative Link 1</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-link"></i></span>
+                                <input type="url" class="form-control" id="alt_download_link1" name="alt_download_link1" 
+                                       placeholder="https://mega.nz/file/...">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="alt_download_link2" class="form-label">Alternative Link 2</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-link"></i></span>
+                                <input type="url" class="form-control" id="alt_download_link2" name="alt_download_link2" 
+                                       placeholder="https://drive.google.com/...">
+                            </div>
+                        </div>
+
+                        <!-- Installation Notes -->
+                        <div class="mb-3">
+                            <label for="install_notes" class="form-label">Installation Notes</label>
+                            <textarea class="form-control" id="install_notes" name="install_notes" rows="3" 
+                                      placeholder="Special installation instructions, crack info, or other important notes..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-desktop me-2"></i>System Requirements</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Platform -->
+                        <div class="mb-3">
+                            <label class="form-label">Supported Platforms</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="feature-toggle">
+                                        <input type="checkbox" class="form-check-input" id="windows" name="platforms" value="windows">
+                                        <label for="windows">🖥️ Windows</label>
+                                    </div>
+                                    <div class="feature-toggle">
+                                        <input type="checkbox" class="form-check-input" id="mac" name="platforms" value="mac">
+                                        <label for="mac">🍎 macOS</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="feature-toggle">
+                                        <input type="checkbox" class="form-check-input" id="linux" name="platforms" value="linux">
+                                        <label for="linux">🐧 Linux</label>
+                                    </div>
+                                    <div class="feature-toggle">
+                                        <input type="checkbox" class="form-check-input" id="android" name="platforms" value="android">
+                                        <label for="android">📱 Android</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Requirements -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="min_requirements" class="form-label">Minimum Requirements</label>
+                                <textarea class="form-control" id="min_requirements" name="min_requirements" rows="4" 
+                                          placeholder="OS: Windows 10&#10;CPU: Intel i3 / AMD FX&#10;RAM: 4GB&#10;GPU: GTX 750Ti"></textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="rec_requirements" class="form-label">Recommended Requirements</label>
+                                <textarea class="form-control" id="rec_requirements" name="rec_requirements" rows="4" 
+                                          placeholder="OS: Windows 11&#10;CPU: Intel i5 / AMD Ryzen 5&#10;RAM: 8GB&#10;GPU: GTX 1060"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Section -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                                <i class="fas fa-rocket me-2"></i>Launch Game
+                            </button>
+                        </div>
+                        <p class="mt-3 text-muted mb-0">
+                            <i class="fas fa-info-circle me-1"></i>
+                            All fields marked with * are required
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/enhanced-upload.js') }}"></script>
+{% endblock %}

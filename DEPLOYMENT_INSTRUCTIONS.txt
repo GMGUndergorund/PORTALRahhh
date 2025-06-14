@@ -1,0 +1,54 @@
+
+FREEGAMES HUB - DEPLOYMENT INSTRUCTIONS
+======================================
+
+1. EXTRACT FILES
+   - Extract all files to your web server directory
+   - Ensure Python 3.11+ is installed
+
+2. INSTALL DEPENDENCIES
+   pip install -r deploy_requirements.txt
+
+3. ENVIRONMENT VARIABLES (Required)
+   SESSION_SECRET=your-random-secret-key-here
+   DATABASE_URL=postgresql://... (optional, uses JSON if not set)
+
+4. RUN APPLICATION
+   
+   Development:
+   python main.py
+   
+   Production:
+   gunicorn --bind 0.0.0.0:5000 main:app
+
+5. ACCESS CREDENTIALS
+   
+   Website Password: FreeGames2025
+   Admin Username: Zipdaddy  
+   Admin Password: Kareem.1707
+
+6. FEATURES INCLUDED
+   - Password-protected website access
+   - Modern gaming-themed UI with dark mode
+   - Enhanced game upload with screenshots
+   - Comprehensive game details (developer, publisher, system requirements)
+   - Multiple download links support
+   - Search engine protection (robots.txt)
+   - Advanced search and filtering
+   - Mobile-responsive design
+
+7. SECURITY NOTES
+   - robots.txt blocks all search engines
+   - Password required for any website access
+   - Secure admin panel
+   - File upload validation
+   - Session protection
+
+8. CUSTOMIZATION
+   - Change passwords in routes.py
+   - Modify website name in templates
+   - Update theme colors in static/css/modern-theme.css
+   - Add more genres in upload form
+
+Deployment Date: 2025-06-14 20:41:00
+Version: Enhanced Gaming Platform v2.0
